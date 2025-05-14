@@ -1,30 +1,35 @@
+# python
+import random
+
 from Model.model import DecisionModel
-from View.console_view import ConsoleView
+from View.gui_view import GUIView
 
 class MainController:
     def __init__(self):
         self.model = DecisionModel()
-        self.view = ConsoleView()
+        self.view = GUIView(self.process_input)
+
+    def process_input(self, n, m, mode, alpha):
+        try:
+            if mode == "manual":
+                matrix = self.view.get_matrix_input(n, m)
+            else:
+                matrix = [[round(random.uniform(0, 100), 2) for _ in range(m)] for _ in range(n)]
+
+            self.model.set_matrix(matrix)
+            self.view.show_matrix(matrix)
+
+            # Calcular resultados de los métodos
+            results = [
+                ("Pesimista (Maximin)", self.model.pessimistic()),
+                ("Optimista (Maximax)", self.model.optimistic()),
+                ("Savage (Arrepentimiento)", self.model.savage()),
+                ("Laplace", self.model.laplace()),
+                ("Hurwicz", self.model.hurwicz(alpha)),
+            ]
+            self.view.show_results(results)
+        except ValueError as e:
+            self.view.show_error(str(e))
 
     def run(self):
-        n = int(input("Ingrese número de filas (n): "))
-        m = int(input("Ingrese número de columnas (m): "))
-        modo = input("¿Desea llenar la matriz manualmente (M) o automáticamente (A)? ").lower()
-
-        if modo == "m":
-            matrix = self.view.get_matrix_input(n, m)
-        else:
-            self.model.generate_matrix(n, m)
-            matrix = self.model.matrix
-
-        self.model.set_matrix(matrix)
-        self.view.show_matrix(matrix)
-
-        self.view.show_results("Laplace", self.model.laplace())
-
-        alpha = float(input("Ingrese el valor de alfa (0 <= α <= 1) para Hurwicz: "))
-        self.view.show_results("Hurwicz", self.model.hurwicz(alpha))
-
-        self.view.show_results("Optimista (Maximax)", self.model.optimistic())
-        self.view.show_results("Pesimista (Maximin)", self.model.pessimistic())
-        self.view.show_results("Savage (Arrepentimiento)", self.model.savage())
+        self.view.root.mainloop()
