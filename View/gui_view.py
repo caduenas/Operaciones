@@ -37,7 +37,7 @@ class GUIView:
         self.generate_button_matrix_results = ttk.Button(
             self.form_frame,
             text="Generar Matriz y Resultados",
-            command=self.on_generate_results
+            command=self.on_generate_matrix_and_results
         )
         self.generate_button_matrix_results.grid(row=4, column=1, columnspan=3, pady=10)
 
@@ -77,19 +77,19 @@ class GUIView:
 
         self.matrix_table = None
 
-    #def on_generate_matrix_and_results(self):
-    #    try:
-    #        n = int(self.rows_entry.get())
-    #        m = int(self.cols_entry.get())
-    #        mode = self.fill_mode.get()
-    #        alpha = float(self.alpha_entry.get())
+    def on_generate_matrix_and_results(self):
+        try:
+            n = int(self.rows_entry.get())
+            m = int(self.cols_entry.get())
+            mode = self.fill_mode.get()
+            alpha = float(self.alpha_entry.get())
 
-    #        if not (0 <= alpha <= 1):
-    #            raise ValueError("El valor de α debe estar entre 0 y 1.")
+            if not (0 <= alpha <= 1):
+                raise ValueError("El valor de α debe estar entre 0 y 1.")
 
-    #        self.process_input_callback(n, m, mode, alpha)
-    #    except ValueError as e:
-    #        self.show_error(str(e))
+            self.process_input_callback(n, m, mode, alpha)
+        except ValueError as e:
+            self.show_error(str(e))
 
     def on_generate_results(self):
         try:
