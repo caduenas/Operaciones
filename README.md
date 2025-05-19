@@ -14,7 +14,12 @@ El proyecto está organizado en los siguientes directorios:
 ## Requisitos
 
 - Python 3.8 o superior
-- Bibliotecas estándar de Python (`tkinter`, `math`)
+- Bibliotecas necesarias:
+  - `tkinter` (incluido con Python)
+  - `random` (incluido con Python)
+  - `math` (incluido con Python)
+  - `numpy`
+  - `psutil`
 
 ## Instalación
 
@@ -28,7 +33,14 @@ El proyecto está organizado en los siguientes directorios:
     ```
     python --version
     ```
-    No se requieren dependencias adicionales, ya que tkinter viene incluido con Python.
+
+3. Instala las dependencias necesarias utilizando `pip`:
+    ```
+    pip install numpy
+    pip install psutil
+    ```
+
+   Nota: `tkinter` y `math` vienen incluidos con Python, por lo que no requieren instalación adicional.
 
 ## Ejecución
 
@@ -64,9 +76,9 @@ Cada método de decisión implementado en el proyecto tiene su propia lógica en
 
     metodos-decision/
     ├── Main/
-    │ ├── main.py
-    │ └── main_controller.py
+    │ └─ main.py
     ├── Controller/
+    | └── main_controller.py
     ├── View/
     │ ├── gui_view.py
     │ └── second_window.py
