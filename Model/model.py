@@ -15,7 +15,7 @@ class DecisionModel:
 
     def laplace(self):
         # Calcula el método de Laplace en lote
-        return np.mean(self.matrix.toarray(), axis=1)
+        return np.mean(self.matrix, axis=1)
 
     def hurwicz(self, alpha):
         # Calcula el método de Hurwicz
