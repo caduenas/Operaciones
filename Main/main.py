@@ -1,4 +1,3 @@
-# Archivo: Main/main.py
 from Controller.main_controller import MainController
 
 if __name__ == "__main__":

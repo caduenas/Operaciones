@@ -1,91 +1,34 @@
-import random
+# Importación de las clases necesarias
+from View.first_window import FirstWindow
+from View.second_window import SecondWindow
 from Model.model import DecisionModel
-from View.gui_view import GUIView
 
 class MainController:
     def __init__(self):
-        self.model = DecisionModel()
-        self.matrix = None
-        self.n = None
-        self.m = None
-        self.alpha = None
-        self.view = GUIView(
-            self.process_input,
-            self.process_results,
-            self.show_viewport,
-            self.create_zero_matrix
+        self.model = DecisionModel()  # Modelo para los cálculos
+        self.first_window = FirstWindow(self.start_application)  # Ventana inicial
+        self.second_window = None  # Ventana secundaria
+
+    def start_application(self, n, m, alpha):
+        # Inicia la aplicación con los valores ingresados
+        self.first_window.destroy()  # Cierra la ventana inicial
+        self.model.set_matrix(self.model.generate_matrix(n, m))  # Genera y establece la matriz
+        self.second_window = SecondWindow(
+            parent=None,
+            model=self.model,
+            n=n,
+            m=m,
+            alpha=alpha,
+            show_matrix_flag=True,
+            on_generate_zero_matrix=self._generate_zero_matrix
         )
 
-    def process_input(self, n, m, mode, alpha, start_row=0, start_col=0):
-        try:
-            if mode == "manual":
-                matrix = self.view.get_matrix_input(n, m)
-            else:
-                matrix = [[round(random.uniform(0, 100), 2) for _ in range(m)] for _ in range(n)]
-            self.model.set_matrix(matrix)
-            self.matrix = matrix
-            self.n = n
-            self.m = m
-            self.alpha = alpha
-            self.view.show_matrix(matrix, start_row, start_col)
-            results = [
-                ("Pesimista", self.model.pessimistic()),
-                ("Optimista", self.model.optimistic()),
-                ("Savage", self.model.savage()),
-                ("Laplace", self.model.laplace()),
-                ("Hurwicz", self.model.hurwicz(alpha)),
-            ]
-            self.view.show_results(results)
-        except ValueError as e:
-            self.view.show_error(str(e))
-
-    def process_results(self, n, m, mode, alpha, start_row=0, start_col=0):
-        try:
-            if self.matrix:
-                matrix = self.matrix
-            else:
-                if mode == "manual":
-                    matrix = self.view.get_matrix_input(n, m)
-                else:
-                    matrix = [[round(random.uniform(0, 100), 2) for _ in range(m)] for _ in range(n)]
-                self.model.set_matrix(matrix)
-                self.matrix = matrix
-                self.n = n
-                self.m = m
-            self.alpha = alpha
-            self.view.show_matrix(matrix, start_row, start_col)
-            results = [
-                ("Pesimista", self.model.pessimistic()),
-                ("Optimista", self.model.optimistic()),
-                ("Savage", self.model.savage()),
-                ("Laplace", self.model.laplace()),
-                ("Hurwicz", self.model.hurwicz(alpha)),
-            ]
-            self.view.show_results(results)
-        except ValueError as e:
-            self.view.show_error(str(e))
-
-    def show_viewport(self, start_row, start_col):
-        if self.matrix:
-            self.view.show_matrix(self.matrix, start_row, start_col)
-        else:
-            self.view.show_error("Primero debe generar una matriz.")
-
-    def create_zero_matrix(self, n, m):
-        matrix = [[0 for _ in range(m)] for _ in range(n)]
-        self.model.set_matrix(matrix)
-        self.matrix = matrix
-        self.n = n
-        self.m = m
-        self.alpha = 0.5  # Valor por defecto para alpha
-        self.view.show_matrix(matrix, 0, 0)
-        self.view.show_results([
-            ("Pesimista", self.model.pessimistic()),
-            ("Optimista", self.model.optimistic()),
-            ("Savage", self.model.savage()),
-            ("Laplace", self.model.laplace()),
-            ("Hurwicz", self.model.hurwicz(self.alpha)),
-        ])
+    def _generate_zero_matrix(self):
+        # Genera una matriz de ceros y la establece en el modelo
+        n, m = self.model.matrix.shape
+        self.model.set_matrix(np.zeros((n, m)))
+        self.second_window.update_matrix_and_results(0, 0, self.second_window.alpha)
 
     def run(self):
-        self.view.root.mainloop()
+        # Ejecuta la ventana inicial
+        self.first_window.mainloop()
