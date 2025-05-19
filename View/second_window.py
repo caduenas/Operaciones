@@ -1,40 +1,64 @@
-# Importación de las bibliotecas necesarias
 import tkinter as tk
 from tkinter import ttk, messagebox
 import math
 
 class SecondWindow(tk.Toplevel):
-    def __init__(self, parent, model, n, m, alpha, show_matrix_flag, on_generate_zero_matrix):
+    def __init__(self, parent, n, m, alpha, matrix, model, show_matrix, on_update_results, on_update_matrix, on_generate_zero_matrix, mode):
         super().__init__(parent)
-        self.model = model  # Modelo que contiene los métodos de decisión
-        self.n = n  # Número de filas de la matriz
-        self.m = m  # Número de columnas de la matriz
-        self.alpha = alpha  # Valor inicial de α
-        self.show_matrix_flag = show_matrix_flag  # Bandera para mostrar la matriz
-        self.on_generate_zero_matrix = on_generate_zero_matrix  # Callback para generar una matriz de ceros
+        self.n = n
+        self.m = m
+        self.alpha = alpha
+        self.matrix = matrix
+        self.model = model
+        self.show_matrix_flag = show_matrix
+        self.on_update_results = on_update_results
+        self.on_update_matrix = on_update_matrix
+        self.on_generate_zero_matrix = on_generate_zero_matrix
+        self.mode = mode
+        self.title("Resultados y matriz")
+        self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
+        self.geometry("1200x700")
+        self.attributes('-fullscreen', True)
+        self._build_gui()
+        self.grab_set()
 
-        # Configuración de la ventana principal
-        self.title("Segunda Ventana")
-        self.geometry("800x600")
+    def _build_gui(self):
+        frm = ttk.Frame(self, padding=10)
+        frm.pack(fill=tk.BOTH, expand=True)
 
-        # Creación del marco principal
+        if self.show_matrix_flag:
+            ttk.Label(frm, text="Fila inicial a mostrar:").grid(row=0, column=0, sticky="w")
+            self.start_row_entry = ttk.Entry(frm, width=10)
+            self.start_row_entry.grid(row=0, column=1)
+            self.start_row_entry.insert(0, "1")
+
+            ttk.Label(frm, text="Columna inicial a mostrar:").grid(row=0, column=2, sticky="w")
+            self.start_col_entry = ttk.Entry(frm, width=10)
+            self.start_col_entry.grid(row=0, column=3)
+            self.start_col_entry.insert(0, "1")
+
+        ttk.Label(frm, text="Valor de α (0 <= α <= 1):").grid(row=0, column=4, sticky="w")
+        self.alpha_entry = ttk.Entry(frm, width=10)
+        self.alpha_entry.grid(row=0, column=5)
+        self.alpha_entry.insert(0, str(self.alpha))
+
+        ttk.Button(frm, text="Actualizar resultados", command=self._update_results).grid(row=0, column=6, padx=5)
+
+        if self.show_matrix_flag:
+            ttk.Button(frm, text="Redibujar matriz", command=self._update_matrix).grid(row=0, column=7, padx=5)
+        ttk.Button(frm, text="Generar matriz desde cero", command=self._generate_zero_matrix).grid(row=0, column=8, padx=5)
+
         main_frame = ttk.Frame(self)
         main_frame.pack(fill=tk.BOTH, expand=True)
         main_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
-
-        # Creación del lienzo para manejar el desplazamiento
         self.canvas = tk.Canvas(main_frame)
         self.canvas.grid(row=0, column=0, sticky="nsew")
-
-        # Barras de desplazamiento vertical y horizontal
         vbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.canvas.yview)
         vbar.grid(row=0, column=1, sticky="ns")
         hbar = ttk.Scrollbar(main_frame, orient=tk.HORIZONTAL, command=self.canvas.xview)
         hbar.grid(row=1, column=0, sticky="ew")
         self.canvas.configure(yscrollcommand=vbar.set, xscrollcommand=hbar.set)
-
-        # Marco desplazable dentro del lienzo
         self.scrollable_frame = ttk.Frame(self.canvas)
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.scrollable_frame.bind(
@@ -42,65 +66,53 @@ class SecondWindow(tk.Toplevel):
             lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         )
 
-        # Marcos para la matriz y los resultados
         self.matrix_frame = ttk.Frame(self.scrollable_frame)
-        self.matrix_frame.pack(side=tk.TOP, anchor="w", padx=10, pady=(0, 0))
+        self.matrix_frame.pack(side=tk.TOP, anchor="w", padx=10, pady=(0,0))
         self.results_frame = ttk.Frame(self.scrollable_frame)
-        self.results_frame.pack(side=tk.TOP, anchor="w", padx=10, pady=(0, 0))
+        self.results_frame.pack(side=tk.TOP, anchor="w", padx=10, pady=(0,0))
 
-        # Mostrar la matriz y los resultados iniciales
         self._show_matrix_and_results()
 
     def _show_matrix_and_results(self):
-        # Muestra la matriz y los resultados según la configuración actual
         if not self.show_matrix_flag:
             self._show_results(float(self.alpha_entry.get() or self.alpha))
             return
 
         try:
-            # Obtiene los valores de fila, columna y α desde las entradas
             start_row = int(self.start_row_entry.get() or 1)
             start_col = int(self.start_col_entry.get() or 1)
             alpha = float(self.alpha_entry.get() or self.alpha)
         except:
-            # Muestra un error si los valores son inválidos
             messagebox.showerror("Error", "Campos de fila, columna o α inválidos.")
             return
 
-        # Verifica que las filas y columnas estén dentro del rango permitido
         if not (1 <= start_row <= self.n) or not (1 <= start_col <= self.m):
             messagebox.showerror("Error", "Fila o columna de inicio fuera de rango")
             return
 
-        # Limpia el marco de la matriz y muestra la nueva matriz
         for widget in self.matrix_frame.winfo_children():
             widget.destroy()
-        self._show_matrix(start_row - 1, start_col - 1)
+        self._show_matrix(start_row-1, start_col-1)
         self._show_results(alpha)
 
     def _show_matrix(self, start_row, start_col, max_size=30):
-        # Muestra una porción de la matriz en el marco
         n, m = self.n, self.m
         end_row = min(start_row + max_size, n)
         end_col = min(start_col + max_size, m)
 
-        # Encabezados de las columnas
         for j in range(start_col, end_col):
             tk.Label(self.matrix_frame, text=f"C{j+1}", bg="#d9ead3", borderwidth=1, relief="solid", width=10).grid(row=0, column=j - start_col + 1)
 
-        # Encabezados de las filas y valores de la matriz
         for i in range(start_row, end_row):
             tk.Label(self.matrix_frame, text=f"F{i+1}", bg="#d9ead3", borderwidth=1, relief="solid", width=10).grid(row=i - start_row + 1, column=0)
             for j in range(start_col, end_col):
                 tk.Label(self.matrix_frame, text=str(self.matrix[i][j]), borderwidth=1, relief="solid", width=10).grid(row=i - start_row + 1, column=j - start_col + 1)
 
-        # Muestra un aviso si la matriz es demasiado grande
         if n > max_size or m > max_size:
             aviso = ttk.Label(self.matrix_frame, text=f"Mostrando desde Fila {start_row+1}, Columna {start_col+1} hasta Fila {end_row}, Columna {end_col}", foreground="red")
             aviso.grid(row=(end_row - start_row + 2), column=0, columnspan=(end_col - start_col + 2), pady=10)
 
     def _show_results(self, alpha):
-        # Muestra los resultados de los métodos de decisión
         for widget in self.results_frame.winfo_children():
             widget.destroy()
         results = [
@@ -111,7 +123,6 @@ class SecondWindow(tk.Toplevel):
             ("Hurwicz", self.model.hurwicz(alpha)),
         ]
         for idx, (method_name, res) in enumerate(results):
-            # Resalta el valor óptimo según el método
             highlight_value = min(res) if method_name == "Savage" else max(res)
             optimal_label = ttk.Label(
                 self.results_frame,
@@ -120,14 +131,12 @@ class SecondWindow(tk.Toplevel):
             )
             optimal_label.grid(row=idx * 2, column=0, padx=10, pady=5, sticky="w")
 
-            # Contenedor para los resultados completos
             container = ttk.Frame(self.results_frame, padding=10, borderwidth=2, relief="ridge")
             container.grid(row=idx * 2 + 1, column=0, padx=10, pady=15, sticky="nsew")
 
             method_label = ttk.Label(container, text=f"Resultados completos para el método: {method_name}", font=("Arial", 10, "bold"))
             method_label.pack(anchor="w", pady=5)
 
-            # Marco para el texto desplazable
             text_frame = ttk.Frame(container)
             text_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -138,18 +147,15 @@ class SecondWindow(tk.Toplevel):
             results_text.pack(fill=tk.BOTH, expand=True)
             text_scrollbar.config(command=results_text.yview)
 
-            # Inserta los valores en el cuadro de texto
             for value in res:
                 color = "dark green" if value == highlight_value else "black"
                 results_text.insert(tk.END, f"{value}\n", (color,))
 
-            # Configura los estilos de texto
             results_text.tag_configure("dark green", foreground="dark green")
             results_text.tag_configure("black", foreground="black")
             results_text.config(state=tk.DISABLED)
 
     def _update_results(self):
-        # Actualiza los resultados si el valor de α cambia
         alpha = float(self.alpha_entry.get() or self.alpha)
         if math.isclose(alpha, self.alpha):
             messagebox.showinfo("Sin cambios", "El valor de α no ha cambiado.")
@@ -158,7 +164,6 @@ class SecondWindow(tk.Toplevel):
         self._show_matrix_and_results()
 
     def _update_matrix(self):
-        # Actualiza la matriz si la bandera está activa
         if not self.show_matrix_flag:
             return
         try:
@@ -169,19 +174,15 @@ class SecondWindow(tk.Toplevel):
             messagebox.showerror("Error", "Campos de fila o columna inválidos.")
 
     def _generate_zero_matrix(self):
-        # Genera una matriz de ceros
         self.on_generate_zero_matrix()
 
     def update_results(self, start_row, start_col, alpha):
-        # Actualiza los resultados con nuevos valores
         self.alpha = alpha
         self._show_matrix_and_results()
 
     def update_matrix_and_results(self, start_row, start_col, alpha):
-        # Actualiza la matriz y los resultados con nuevos valores
         self.alpha = alpha
         self._show_matrix_and_results()
 
     def close(self):
-        # Cierra la ventana
         self.destroy()
