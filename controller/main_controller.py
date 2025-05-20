@@ -31,9 +31,6 @@ class MainController:
         if mode == "manual":
             # Si el modo es manual, solicita la matriz al usuario
             self.matrix = self.get_manual_matrix(n, m)
-            if self.matrix is None:
-                # El usuario canceló, no continuar
-                return
         else:
             # Si el modo es automático, genera la matriz aleatoriamente
             self.matrix = self.model.generate_matrix(n, m)
@@ -48,9 +45,6 @@ class MainController:
         if mode == "manual":
             # Si el modo es manual, solicita la matriz al usuario
             self.matrix = self.get_manual_matrix(n, m)
-            if self.matrix is None:
-                # El usuario canceló, no continuar
-                return
         else:
             # Si el modo es automático, genera la matriz aleatoriamente
             self.matrix = self.model.generate_matrix(n, m)
@@ -97,26 +91,14 @@ class MainController:
         for i in range(n):
             row = []
             for j in range(m):
-                while True:
-                    try:
-                        # Solicita un valor numérico al usuario
-                        value = simpledialog.askfloat(
-                            "Entrada de Matriz",
-                            f"Ingrese un valor numérico mayor a 0 para la posición ({i + 1}, {j + 1}):"
-                        )
-                        if value is None:
-                            # Si se presiona "Cancelar", regresa al formulario anterior
-                            messagebox.showinfo("Cancelado", "Regresando al formulario anterior.")
-                            self.first_window.show()  # Vuelve a mostrar la ventana principal
-                            return None  # Detiene el proceso
-                        if value <= 0:
-                            # Verifica que el valor sea mayor a 0
-                            raise ValueError("El valor debe ser mayor a 0.")
-                        row.append(value)
-                        break  # Sale del bucle si el valor es válido
-                    except ValueError:
-                        # Muestra un mensaje de error si el valor no es válido
-                        messagebox.showerror("Error", f"Por favor ingrese un valor numérico mayor a 0.")
+                value = simpledialog.askfloat(
+                    "Entrada de Matriz",
+                    f"Ingrese el valor para la posición ({i + 1}, {j + 1}):"
+                )
+                if value is None:
+                    # Si el usuario cancela, lanza una excepción
+                    raise ValueError("Se canceló la entrada de la matriz.")
+                row.append(value)
             matrix.append(row)
         return matrix
 
