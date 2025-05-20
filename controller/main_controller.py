@@ -1,8 +1,8 @@
 import math
 from tkinter import simpledialog, messagebox
-from View.first_window import FirstWindow
-from View.second_window import SecondWindow
-from Model.model import DecisionModel
+from view.first_window import FirstWindow
+from view.second_window import SecondWindow
+from model.model import DecisionModel
 
 class MainController:
     def __init__(self):
