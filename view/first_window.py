@@ -85,7 +85,7 @@ class FirstWindow:
             if total_gib > ram_gib * 0.8:  # Solo permite si hay al menos 20% de RAM libre
                 messagebox.showerror(
                     "Error de memoria",
-                    f"No es posible crear una matriz de {n:,} x {m:,}: requiere aproximadamente {total_gib:.2f} GiB de memoria RAM, "
+                    f"No es posible crear una matriz de {n:,} x {m:,}: requiere aproximadamente {total_gib:.2f} GB de memoria RAM, "
                     f"pero solo hay {ram_gib:.2f} GB disponibles.\n"
                     "Reduce el tamaño de la matriz para poder realizar la operación."
                 )
@@ -118,7 +118,7 @@ class FirstWindow:
             if total_gib > ram_gib * 0.8:
                 messagebox.showerror(
                     "Error de memoria",
-                    f"No es posible crear una matriz de {n:,} x {m:,}: requiere aproximadamente {total_gib:.2f} GiB de memoria RAM, "
+                    f"No es posible crear una matriz de {n:,} x {m:,}: requiere aproximadamente {total_gib:.2f} GB de memoria RAM, "
                     f"pero solo hay {ram_gib:.2f} GB disponibles.\n"
                     "Reduce el tamaño de la matriz para poder realizar la operación."
                 )
